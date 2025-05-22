@@ -75,7 +75,7 @@ function FeatureCard({
   title: string;
   description: string;
 }) {
-  return <div className="bg-white rounded-xl p-6 shadow-lg hover:shadow-xl transition-shadow">
+  return <div className="bg-white rounded-xl p-6 shadow-lg hover:shadow-xl transition-all cursor-pointer transform hover:scale-105">
       <div className="text-4xl mb-4">{icon}</div>
       <h3 className="text-xl font-bold mb-2 text-indigo-600">{title}</h3>
       <p className="text-gray-600">{description}</p>
@@ -90,7 +90,7 @@ function SubjectCard({
   title: string;
   description: string;
 }) {
-  return <div className="bg-white rounded-xl p-6 shadow-lg hover:shadow-xl transition-shadow">
+  return <div className="bg-white rounded-xl p-6 shadow-lg hover:shadow-xl transition-all cursor-pointer transform hover:scale-105">
       <div className="text-4xl mb-4">{icon}</div>
       <h3 className="text-xl font-bold mb-2 text-indigo-600">{title}</h3>
       <p className="text-gray-600">{description}</p>

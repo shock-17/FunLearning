@@ -27,6 +27,8 @@ type AuthContextType = {
   register: (name: string, email: string, password: string) => Promise<void>;
   logout: () => void;
   addKidProfile: (name: string, avatar: KidProfile['avatar']) => void;
+  deleteKidProfile: (profileId: string) => void;
+  updateKidProfile: (profileId: string, name: string, avatar: KidProfile['avatar']) => void;
   selectKidProfile: (profileId: string) => void;
   updateKidScore: (subject: string, difficulty: string, score: number) => void;
 };
@@ -97,6 +99,48 @@ export function AuthProvider({
     // Update both current user and the registered users list
     updateUserState(updatedUser);
   };
+  const updateKidProfile = (profileId: string, name: string, avatar: KidProfile['avatar']) => {
+    if (!user) return;
+    // Find the profile to update
+    const profileIndex = user.kidProfiles.findIndex(profile => profile.id === profileId);
+    if (profileIndex === -1) return;
+    // Create a deep copy of all profiles to avoid reference issues
+    const updatedProfiles = JSON.parse(JSON.stringify(user.kidProfiles));
+    // Update the profile
+    updatedProfiles[profileIndex].name = name;
+    updatedProfiles[profileIndex].avatar = avatar;
+    // Check if the profile being updated is the active profile
+    const isActiveProfile = user.activeKidProfile?.id === profileId;
+    // Create the updated user object
+    const updatedUser = {
+      ...user,
+      kidProfiles: updatedProfiles,
+      // Update activeKidProfile if it's the one being edited
+      activeKidProfile: isActiveProfile ? {
+        ...user.activeKidProfile!,
+        name,
+        avatar
+      } : user.activeKidProfile
+    };
+    // Update both current user and the registered users list
+    updateUserState(updatedUser);
+  };
+  const deleteKidProfile = (profileId: string) => {
+    if (!user) return;
+    // Check if the profile to delete is currently active
+    const isActiveProfile = user.activeKidProfile?.id === profileId;
+    // Filter out the profile to delete
+    const updatedProfiles = user.kidProfiles.filter(profile => profile.id !== profileId);
+    // Create updated user object
+    const updatedUser = {
+      ...user,
+      kidProfiles: updatedProfiles,
+      // Remove activeKidProfile if it's the one being deleted
+      activeKidProfile: isActiveProfile ? undefined : user.activeKidProfile
+    };
+    // Update both current user and the registered users list
+    updateUserState(updatedUser);
+  };
   const selectKidProfile = (profileId: string) => {
     if (!user) return;
     const profile = user.kidProfiles.find(p => p.id === profileId);
@@ -112,27 +156,28 @@ export function AuthProvider({
   };
   const updateKidScore = (subject: string, difficulty: string, score: number) => {
     if (!user?.activeKidProfile) return;
-    // Find the active profile in the kidProfiles array (by ID)
-    const activeProfileId = user.activeKidProfile.id;
-    const activeProfileIndex = user.kidProfiles.findIndex(p => p.id === activeProfileId);
-    if (activeProfileIndex === -1) return;
     // Create a new score entry with a unique ID
     const newScore = {
-      id: Math.random().toString(36).substring(7),
+      id: `score_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`,
       subject,
       difficulty,
       score,
       date: new Date().toISOString()
     };
-    // Create a new copy of all profiles
-    const updatedProfiles = [...user.kidProfiles];
-    // Update the specific profile's scores
-    updatedProfiles[activeProfileIndex] = {
-      ...updatedProfiles[activeProfileIndex],
-      scores: [...updatedProfiles[activeProfileIndex].scores, newScore]
-    };
-    // Create the updated active profile reference
-    const updatedActiveProfile = updatedProfiles[activeProfileIndex];
+    // Find the active profile in the kidProfiles array (by ID)
+    const activeProfileId = user.activeKidProfile.id;
+    const activeProfileIndex = user.kidProfiles.findIndex(p => p.id === activeProfileId);
+    if (activeProfileIndex === -1) return;
+    // Create a deep copy of all profiles to avoid reference issues
+    const updatedProfiles = JSON.parse(JSON.stringify(user.kidProfiles));
+    // Ensure scores array exists
+    if (!updatedProfiles[activeProfileIndex].scores) {
+      updatedProfiles[activeProfileIndex].scores = [];
+    }
+    // Add the new score to the specific profile
+    updatedProfiles[activeProfileIndex].scores.push(newScore);
+    // Create the updated active profile reference (deep copy)
+    const updatedActiveProfile = JSON.parse(JSON.stringify(updatedProfiles[activeProfileIndex]));
     // Create the full updated user
     const updatedUser = {
       ...user,
@@ -163,6 +208,8 @@ export function AuthProvider({
     register,
     logout,
     addKidProfile,
+    deleteKidProfile,
+    updateKidProfile,
     selectKidProfile,
     updateKidScore
   }}>

@@ -12,8 +12,11 @@ import { GamePage } from './pages/GamePage';
 import { GameProvider } from './context/GameContext';
 import { AuthProvider } from './context/AuthContext';
 import { ProtectedRoute } from './components/ProtectedRoute';
+import { Analytics } from '@vercel/analytics/react'; // ✅ Import here
+
 export function App() {
-  return <Router>
+  return (
+    <Router>
       <AuthProvider>
         <GameProvider>
           <div className="w-full min-h-screen bg-gradient-to-b from-blue-100 to-purple-100 font-sans">
@@ -21,27 +24,61 @@ export function App() {
               <Route path="/" element={<LandingPage />} />
               <Route path="/login" element={<LoginPage />} />
               <Route path="/register" element={<RegisterPage />} />
-              <Route path="/home" element={<ProtectedRoute>
+              <Route
+                path="/home"
+                element={
+                  <ProtectedRoute>
                     <KidProfilesPage />
-                  </ProtectedRoute>} />
-              <Route path="/kid-profiles" element={<ProtectedRoute>
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/kid-profiles"
+                element={
+                  <ProtectedRoute>
                     <KidProfilesPage />
-                  </ProtectedRoute>} />
-              <Route path="/profile-selection" element={<ProtectedRoute>
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/profile-selection"
+                element={
+                  <ProtectedRoute>
                     <ProfileSelectionPage />
-                  </ProtectedRoute>} />
-              <Route path="/subjects" element={<ProtectedRoute>
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/subjects"
+                element={
+                  <ProtectedRoute>
                     <SubjectSelectionPage />
-                  </ProtectedRoute>} />
-              <Route path="/difficulty/:subject" element={<ProtectedRoute>
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/difficulty/:subject"
+                element={
+                  <ProtectedRoute>
                     <DifficultySelectionPage />
-                  </ProtectedRoute>} />
-              <Route path="/play/:subject/:difficulty" element={<ProtectedRoute>
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/play/:subject/:difficulty"
+                element={
+                  <ProtectedRoute>
                     <GamePage />
-                  </ProtectedRoute>} />
+                  </ProtectedRoute>
+                }
+              />
             </Routes>
+
+            {/* ✅ Analytics added here */}
+            <Analytics />
           </div>
         </GameProvider>
       </AuthProvider>
-    </Router>;
+    </Router>
+  );
 }
